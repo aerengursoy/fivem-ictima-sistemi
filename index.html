@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>EGM | Operasyon Kontrol Paneli</title>
+    <style>
+        :root {
+            --bg: #1e1f22; --card: #2b2d31; --text: #dbdee1;
+            --primary: #5865f2; --success: #23a559; --warning: #f0b232; 
+            --danger: #f23f42; --accent: #7289da;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 900px; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        h1 { text-align: center; color: white; font-size: 20px; border-bottom: 1px solid #4e5058; padding-bottom: 15px; margin-bottom: 25px; }
+        
+        .tabs { display: flex; gap: 8px; margin-bottom: 25px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px; }
+        .tab-btn { flex: 1; background: none; border: none; color: #949ba4; font-weight: bold; cursor: pointer; padding: 12px; border-radius: 6px; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .section-box { background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        textarea { width: 100%; height: 100px; background: #1e1f22; color: #dcddde; border: 1px solid #4e5058; border-radius: 6px; padding: 12px; box-sizing: border-box; font-family: monospace; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; background: var(--primary); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: #1e1f22; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 3px solid var(--primary); }
+        .stat-val { display: block; font-size: 18px; font-weight: bold; color: white; }
+        .stat-lbl { font-size: 10px; color: #949ba4; text-transform: uppercase; margin-top: 4px; }
+
+        .list { max-height: 400px; overflow-y: auto; margin-top: 15px; }
+        .row { display: flex; align-items: center; background: rgba(255,255,255,0.03); margin-bottom: 5px; padding: 10px; border-radius: 6px; }
+        .name { flex: 1; font-size: 14px; }
+        .opts { display: flex; gap: 5px; }
+        .opts label { cursor: pointer; padding: 5px 10px; border-radius: 4px; background: #4f545c; font-size: 10px; font-weight: bold; }
+        .opts input { display: none; }
+        input[value="gelen"]:checked + label { background: var(--success); }
+        input[value="mazeret"]:checked + label { background: var(--warning); color: black; }
+        input[value="izinli"]:checked + label { background: var(--accent); }
+        input[value="yok"]:checked + label { background: var(--danger); }
+
+        .off-card { background: rgba(0,0,0,0.2); border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+        .off-head { padding: 12px; display: flex; justify-content: space-between; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .p-list { padding: 10px; display: none; border-top: 1px solid rgba(255,255,255,0.05); }
+        .p-item { display: flex; justify-content: space-between; padding: 8px; background: #1e1f22; margin-bottom: 4px; border-radius: 4px; font-size: 12px; }
+        .del { background: var(--danger); border: none; color: white; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-weight: bold; }
+
+        .output-box { background: #000; padding: 20px; margin-top: 20px; border-radius: 6px; white-space: pre-wrap; display: none; border-left: 4px solid var(--success); font-family: monospace; font-size: 13px; }
+        .total-banner { background: var(--success); padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; margin-top: 20px; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>EGM OPERASYON PANELİ</h1>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="tab('t1')">YOKLAMA</button>
+        <button class="tab-btn" onclick="tab('t2')">CEZA ANALİZİ</button>
+    </div>
+
+    <div id="t1" class="tab-content active">
+        <div class="stats-grid">
+            <div class="stat-card"> <span class="stat-val" id="st-top">0</span> <span class="stat-lbl">Toplam</span> </div>
+            <div class="stat-card" style="border-color: var(--success);"> <span class="stat-val" id="st-gelen">0</span> <span class="stat-lbl">Gelen</span> </div>
+            <div class="stat-card" style="border-color: var(--warning);"> <span class="stat-val" id="st-mazeret">0</span> <span class="stat-lbl">Mazeret</span> </div>
+            <div class="stat-card" style="border-color: var(--accent);"> <span class="stat-val" id="st-izinli">0</span> <span class="stat-lbl">İzinli</span> </div>
+            <div class="stat-card" style="border-color: var(--danger);"> <span class="stat-val" id="st-yok">0</span> <span class="stat-lbl">Yok</span> </div>
+        </div>
+
+        <div class="section-box">
+            <p style="font-size: 11px; color: var(--accent); margin-bottom: 5px;">Aşağıdaki koddaki <b>ROL_ID_YAZIN</b> kısmını silip ID'yi tırnak içine yapıştırın:</p>
+            <div style="background:#000; padding:10px; border-radius:5px; position:relative; margin-bottom:10px;">
+                <code id="vCode" style="color:#43b581; font-size:11px; display:block; white-space:pre-wrap;">(async () => { const rId = "ROL_ID_YAZIN"; const { GuildMemberStore, UserStore } = Vencord.Webpack.Common; const gId = window.location.pathname.split('/')[2]; const raw = GuildMemberStore.getMembers(gId); const m = Object.values(raw).filter(x => x.roles.includes(rId)).map(x => ({ id: x.userId, name: x.nick || UserStore.getUser(x.userId).username })); console.log(JSON.stringify(m)); alert(m.length + " kişi hazır."); })();</code>
+                <button onclick="copyCode()" style="position:absolute; top:5px; right:5px; background:var(--primary); color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:10px;">Kodu Kopyala</button>
+            </div>
+            <textarea id="inp-json" placeholder="Vencord çıktısını (köşeli parantezli olan) buraya yapıştırın..."></textarea>
+            <button class="btn" onclick="loadYoklama()">PERSONEL LİSTESİNİ ÇEK</button>
+        </div>
+
+        <div id="m-list" class="list"></div>
+        <button id="btn-rep" class="btn" style="display:none; background: var(--success);" onclick="makeReport()">RAPORU HAZIRLA VE KOPYALA</button>
+        <div id="out-rep" class="output-box"></div>
+    </div>
+
+    <div id="t2" class="tab-content">
+        <div class="section-box">
+            <label style="font-size: 11px;">BİRİM FİLTRESİ:</label>
+            <select id="sel-unit" style="background:#1e1f22; color:white; border:1px solid #4e5058; padding:8px; width:100%; border-radius:5px; margin: 5px 0 10px 0;">
+                <option value="53">53 Birimi</option>
+                <option value="72">72 Birimi</option>
+                <option value="48">48 Birimi</option>
+                <option value="42">42 Birimi</option>
+            </select>
+            <textarea id="inp-logs" placeholder="Discord ceza loglarını buraya yapıştırın..."></textarea>
+            <button class="btn" onclick="loadCezalar()">LOGLARI ANALİZ ET</button>
+        </div>
+        <div id="res-ceza"></div>
+        <div id="banner-ceza" class="total-banner" style="display:none;"></div>
+    </div>
+</div>
+
+<script>
+    function tab(id) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText(document.getElementById('vCode').innerText);
+        alert("Kod kopyalandı! ID'yi değiştirmeyi unutma.");
+    }
+
+    // --- YOKLAMA MANTIĞI ---
+    let yData = [];
+    function loadYoklama() {
+        try {
+            yData = JSON.parse(document.getElementById('inp-json').value);
+            yData.sort((a,b) => a.name.localeCompare(b.name));
+            const container = document.getElementById('m-list');
+            container.innerHTML = "";
+            yData.forEach((p, i) => {
+                container.innerHTML += `<div class="row"><span class="name">${p.name}</span><div class="opts">
+                    <input type="radio" name="r_${i}" id="g_${i}" value="gelen" checked onchange="statsYoklama()"><label for="g_${i}">GELEN</label>
+                    <input type="radio" name="r_${i}" id="m_${i}" value="mazeret" onchange="statsYoklama()"><label for="m_${i}">MAZERET</label>
+                    <input type="radio" name="r_${i}" id="i_${i}" value="izinli" onchange="statsYoklama()"><label for="i_${i}">İZİNLİ</label>
+                    <input type="radio" name="r_${i}" id="y_${i}" value="yok" onchange="statsYoklama()"><label for="y_${i}">YOK</label>
+                </div></div>`;
+            });
+            document.getElementById('btn-rep').style.display = "block";
+            statsYoklama();
+        } catch(e) { alert("Hata: Veri yanlış!"); }
+    }
+
+    function statsYoklama() {
+        let s = { gelen:0, mazeret:0, izinli:0, yok:0 };
+        yData.forEach((_, i) => {
+            const rad = document.querySelector(`input[name="r_${i}"]:checked`);
+            if(rad) s[rad.value]++;
+        });
+        document.getElementById('st-top').innerText = yData.length;
+        document.getElementById('st-gelen').innerText = s.gelen;
+        document.getElementById('st-mazeret').innerText = s.mazeret;
+        document.getElementById('st-izinli').innerText = s.izinli;
+        document.getElementById('st-yok').innerText = s.yok;
+    }
+
+    function makeReport() {
+        let g=[], m=[], iz=[], y=[];
+        yData.forEach((p, i) => {
+            const v = document.querySelector(`input[name="r_${i}"]:checked`).value;
+            const tag = `<@${p.id}>`;
+            if(v==='gelen') g.push(tag); else if(v==='mazeret') m.push(tag); else if(v==='izinli') iz.push(tag); else y.push(tag);
+        });
+        let res = `EGM İÇTİMA RAPORU\nTarih: ${new Date().toLocaleDateString('tr-TR')}\n\n`;
+        if(g.length) res += `Gelenler\n\n${g.map(x => `- ${x}`).join('\n')}\n\n`;
+        if(iz.length) res += `İzinliler\n\n${iz.map(x => `- ${x}`).join('\n')}\n\n`;
+        if(m.length) res += `Mazeretliler\n\n${m.map(x => `- ${x}`).join('\n')}\n\n`;
+        if(y.length) res += `Gelmeyenler\n\n${y.map(x => `- ${x}`).join('\n')}\n\n`;
+        res += `Özet: ${yData.length} Personel`;
+        document.getElementById('out-rep').innerText = res;
+        document.getElementById('out-rep').style.display = "block";
+        navigator.clipboard.writeText(res); alert("Rapor kopyalandı.");
+    }
+
+    // --- CEZA ANALİZİ ---
+    let cData = {};
+    function loadCezalar() {
+        const unit = document.getElementById('sel-unit').value;
+        const txt = document.getElementById('inp-logs').value;
+        const officerBlocks = txt.split(new RegExp(`\n(?=\\[${unit}-\\d{2}\\])`, 'g'));
+        cData = {};
+
+        officerBlocks.forEach(block => {
+            const lines = block.split('\n').map(l => l.trim());
+            if (!lines[0]) return;
+            const headMatch = lines[0].match(new RegExp(`\\[(${unit}-\\d{2})\\]\\s+([^—\\[,]+)`));
+            if (!headMatch) return;
+
+            const curOff = `[${headMatch[1]}] ${headMatch[2].trim()}`;
+            if (!cData[curOff]) cData[curOff] = [];
+
+            const punishEntries = block.split(/ad soyad/i);
+            punishEntries.forEach((entry, index) => {
+                if (index === 0) return;
+                const nameMatch = entry.match(/[:\s]+([^\n\r@]+)/);
+                const crimeMatch = entry.match(/işlenen suç[:\s]+([^\n\r@]+)/i);
+                const priceMatch = entry.match(/idari para cezası[:\s]+([^\n\r@]+)/i);
+
+                if (nameMatch) {
+                    let price = 0;
+                    if (priceMatch) {
+                        let rakam = priceMatch[1].replace(/[^0-9]/g, "");
+                        price = parseInt(rakam) || 0;
+                    }
+                    cData[curOff].push({
+                        isim: nameMatch[1].trim(),
+                        sebep: crimeMatch ? crimeMatch[1].trim() : "Belirtilmedi",
+                        fiyat: price
+                    });
+                }
+            });
+        });
+        renderCeza();
+    }
+
+    function renderCeza() {
+        const div = document.getElementById('res-ceza'); div.innerHTML = "";
+        let gTop = 0;
+        for (let off in cData) {
+            let oTop = cData[off].reduce((a, b) => a + b.fiyat, 0); gTop += oTop;
+            div.innerHTML += `
+                <div class="off-card">
+                    <div class="off-head" onclick="toggle('${off}')">
+                        <span>${off} (${cData[off].length} İşlem)</span> 
+                        <span style="color:var(--success)">${oTop.toLocaleString()} TL</span>
+                    </div>
+                    <div id="l-${off}" class="p-list">
+                        ${cData[off].map((p, i) => `
+                            <div class="p-item">
+                                <span><b>${i+1}.</b> İsim: ${p.isim} | Sebep: ${p.sebep}</span>
+                                <span style="color:var(--warning)">${p.fiyat.toLocaleString()} TL <button class="del" onclick="rem('${off}', ${i})">X</button></span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+        }
+        const b = document.getElementById('banner-ceza');
+        b.innerText = `BİRİM GENEL TOPLAM: ${gTop.toLocaleString()} TL`;
+        b.style.display = gTop > 0 ? "block" : "none";
+    }
+
+    function toggle(id) {
+        const e = document.getElementById(`l-${id}`);
+        e.style.display = (e.style.display === 'block' ? 'none' : 'block');
+    }
+
+    function rem(off, i) {
+        cData[off].splice(i, 1); if(!cData[off].length) delete cData[off];
+        renderCeza();
+    }
+</script>
+</body>
+</html>
