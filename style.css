@@ -1,0 +1,168 @@
+/* --- GENEL AYARLAR --- */
+:root {
+    --bg: #0b0c0e;
+    --card: #16171d;
+    --input-bg: #020202;
+    --text: #e1e1e1;
+    --primary: #5865f2;
+    --success: #23a559;
+    --warning: #f0b232;
+    --info: #00a8fc;
+    --danger: #f23f42;
+    --border: rgba(255, 255, 255, 0.08);
+}
+
+body { 
+    font-family: 'Inter', sans-serif; 
+    background: var(--bg); 
+    color: var(--text); 
+    margin: 0; 
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container { 
+    width: 100%; 
+    max-width: 950px; 
+    background: var(--card); 
+    padding: 40px; 
+    border-radius: 24px; 
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+h1 { 
+    text-align: center; 
+    font-weight: 800; 
+    background: linear-gradient(90deg, #fff, #5865f2); 
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    margin-bottom: 30px; 
+}
+
+/* --- SEKME YÖNETİMİ --- */
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tabs { display: flex; gap: 10px; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 16px; margin-bottom: 30px; }
+.tab-btn { flex: 1; background: none; border: none; color: #8e8e93; font-weight: 600; cursor: pointer; padding: 14px; border-radius: 12px; transition: 0.3s; }
+.tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3); }
+
+/* --- İSTATİSTİK KARTLARI (YUVARLANMIŞ BARLI) --- */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 30px; }
+
+.stat-card { 
+    background: var(--input-bg); 
+    padding: 25px 15px; 
+    border-radius: 20px; 
+    text-align: center; 
+    border: 1px solid var(--border); 
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.stat-val { font-size: 28px; font-weight: 800; color: white; line-height: 1; margin-bottom: 5px; }
+.stat-label { font-size: 11px; color: #8e8e93; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+/* Kelimelerin Altındaki Yuvarlanmış Neon Bar */
+.stat-card::after { 
+    content: ''; 
+    display: block;
+    width: 50%; /* Yazının genişliğiyle uyumlu olması için %50 ideal */
+    height: 5px; 
+    background: var(--accent-color, var(--primary)); 
+    border-radius: 50px; 
+    box-shadow: 0 0 15px var(--accent-color, var(--primary));
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover { border-color: var(--accent-color, var(--primary)); transform: translateY(-5px); }
+.stat-card:hover::after { width: 70%; opacity: 1; box-shadow: 0 0 25px var(--accent-color, var(--primary)); }
+
+/* --- FORM ELEMANLARI --- */
+.section-box { background: rgba(0,0,0,0.15); padding: 25px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 25px; }
+textarea { width: 100%; height: 120px; background: var(--input-bg); color: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; }
+textarea:focus { border-color: var(--primary); }
+
+.btn { width: 100%; padding: 16px; border: none; border-radius: 14px; color: white; font-weight: 700; cursor: pointer; margin-top: 10px; background: var(--primary); font-size: 14px; transition: 0.2s; }
+.btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+
+/* --- PERSONEL SATIRLARI --- */
+.row { display: flex; align-items: center; background: rgba(255,255,255,0.02); margin-bottom: 8px; padding: 12px 20px; border-radius: 14px; border: 1px solid transparent; }
+.row:hover { background: rgba(255,255,255,0.04); border-color: var(--border); }
+.name { flex: 1; font-weight: 600; font-size: 14px; color: #fff; }
+
+.opts { display: flex; gap: 6px; }
+.opts input { display: none; }
+.opts label { cursor: pointer; padding: 8px 14px; border-radius: 10px; background: #2b2d31; font-size: 10px; font-weight: 800; color: #8e8e93; transition: 0.3s; text-transform: uppercase; }
+
+input[value="gelen"]:checked + label { background: var(--success); color: white; box-shadow: 0 0 12px rgba(35, 165, 89, 0.4); }
+input[value="mazeret"]:checked + label { background: var(--warning); color: black; box-shadow: 0 0 12px rgba(240, 178, 50, 0.4); }
+input[value="izinli"]:checked + label { background: var(--info); color: white; box-shadow: 0 0 12px rgba(0, 168, 252, 0.4); }
+input[value="yok"]:checked + label { background: var(--danger); color: white; box-shadow: 0 0 12px rgba(242, 63, 66, 0.4); }
+
+/* --- CEZA ANALİZ & REHBER --- */
+.off-card { background: rgba(255,255,255,0.03); border-radius: 14px; margin-bottom: 12px; border-left: 4px solid var(--primary); overflow: hidden; }
+.off-head { padding: 15px; display: flex; justify-content: space-between; cursor: pointer; font-weight: 700; }
+.p-list { display: none; padding: 15px; background: rgba(0,0,0,0.2); border-top: 1px solid var(--border); }
+
+.guide-container { display: flex; flex-direction: column; gap: 20px; }
+.guide-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 25px; border-radius: 16px; }
+.guide-card h3 { margin-top: 0; color: var(--primary); font-size: 18px; margin-bottom: 10px; }
+.code-block { background: #000; padding: 15px; border-radius: 12px; margin: 15px 0; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #43b581; border: 1px solid var(--border); white-space: pre-wrap; word-break: break-all; }
+
+.total-banner { background: var(--success); color: white; padding: 20px; border-radius: 16px; text-align: center; font-weight: 800; margin-top: 20px; font-size: 18px; }
+
+/* Ceza Satırı Düzeni */
+.punish-item {
+    display: flex;
+    justify-content: space-between; /* Metni sola, butonu sağa yaslar */
+    align-items: center; /* Dikeyde ortalar */
+    background: #1e1f22;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    font-size: 13px;
+    gap: 15px; /* Metinle buton arasına boşluk koyar */
+}
+
+.punish-text {
+    flex: 1; /* Metin kısmının tüm boşluğu kaplamasını sağlar */
+    line-height: 1.5;
+    word-break: break-word; /* Çok uzun suçları alt satıra böler */
+}
+
+.punish-price-zone {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap; /* Fiyatın ve butonun alt alta geçmesini engeller */
+}
+
+.del-btn {
+    background: var(--danger);
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 11px;
+    transition: 0.2s;
+}
+
+.del-btn:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
