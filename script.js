@@ -51,18 +51,27 @@ function statsYok() {
 }
 
 function makeReport() {
-    let g=[], m=[], iz=[], y=[];
+    let lines = [];
+    lines.push("**Yunus Şube Müdürlüğü " + new Date().toLocaleDateString('tr-TR') + " İÇTİMA RAPORU**\n");
+
     yData.forEach((p, i) => {
         const v = document.querySelector(`input[name="r_${i}"]:checked`).value;
-        const tag = `<@${p.id}>`;
-        if(v==='gelen') g.push(tag); else if(v==='mazeret') m.push(tag); else if(v==='izinli') iz.push(tag); else y.push(tag);
+        let statusText = "";
+        
+        if (v === 'gelen') {
+            statusText = "KATILDI";
+        } else if (v === 'mazeret') {
+            statusText = "MAZERETLİ";
+        } else if (v === 'izinli') {
+            statusText = "İZİNLİ";
+        } else {
+            statusText = "**KATILMADI**";
+        }
+        
+        lines.push(`${p.name} : ${statusText}`);
     });
-    let res = `📋 **EGM İÇTİMA RAPORU**\n📅 Tarih: ${new Date().toLocaleDateString('tr-TR')}\n\n`;
-    if(g.length) res += `✅ **Gelenler**\n${g.map(x => `- ${x}`).join('\n')}\n\n`;
-    if(iz.length) res += `ℹ️ **İzinliler**\n${iz.map(x => `- ${x}`).join('\n')}\n\n`;
-    if(m.length) res += `⚠️ **Mazeretliler**\n${m.map(x => `- ${x}`).join('\n')}\n\n`;
-    if(y.length) res += `❌ **Gelmeyenler**\n${y.map(x => `- ${x}`).join('\n')}\n\n`;
-    res += `📊 **Özet:** Toplam ${yData.length} Personel`;
+
+    let res = lines.join('\n');
     navigator.clipboard.writeText(res);
     alert("Rapor kopyalandı!");
 }
