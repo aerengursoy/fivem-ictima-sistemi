@@ -14,7 +14,7 @@
     
     <div class="tabs">
         <button class="tab-btn active" onclick="showTab('ictima')">📍 YOKLAMA</button>
-        <button class="tab-btn" onclick="showTab('ceza')">💰 CEZA ANALİZİ</button>
+        <button class="tab-btn" onclick="showTab('gunsonu')">📝 GÜN SONU</button>
         <button class="tab-btn" onclick="showTab('guide')">📖 REHBER</button>
     </div>
 
@@ -29,46 +29,66 @@
 
         <div class="section-box">
             <textarea id="inp-json" placeholder="Vencord konsol çıktısını buraya yapıştırın..."></textarea>
-            <button class="btn" onclick="loadYoklama()">LİSTEYİ YÜKLE</button>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn" style="flex:1; margin-top:0;" onclick="loadYoklama()">LİSTEYİ YÜKLE</button>
+                <button class="btn" style="flex:1; margin-top:0; background:var(--danger);" onclick="resetList()">TÜM SEÇİMLERİ SIFIRLA</button>
+            </div>
         </div>
 
         <div id="m-list"></div>
         <button id="btn-rep" class="btn" style="display:none; background: var(--success);" onclick="makeReport()">RAPORU HAZIRLA VE KOPYALA</button>
     </div>
 
-    <div id="ceza" class="tab-content">
+    <div id="gunsonu" class="tab-content">
         <div class="section-box">
-            <select id="sel-unit" style="width:100%; background:var(--input-bg); color:white; border:1px solid var(--border); padding:14px; border-radius:12px; margin-bottom:15px;">
-                <option value="53">Birim 53 (Trafik)</option>
-                <option value="72">Birim 72 (Yunus)</option>
-                <option value="48">Birim 48 (Asayiş)</option>
-                <option value="42">Birim 42 (Sivil Asayiş)</option>
-            </select>
-            <textarea id="inp-logs" placeholder="Discord ceza loglarını buraya yapıştırın..."></textarea>
-            <button class="btn" onclick="loadCezalar()">LOGLARI ANALİZ ET</button>
+            <div style="display:flex; gap:15px; margin-bottom:15px;">
+                <input type="date" id="gs-tarih" oninput="saveState()" style="flex:1; background:var(--input-bg); color:white; border:1px solid var(--border); padding:14px; border-radius:12px;">
+            </div>
+            
+            <label style="font-size:12px; color:var(--primary); font-weight:700;">GÜNÜN FAALİYETLERİ</label>
+            <textarea id="gs-faaliyet" oninput="saveState()" style="height:110px; margin-top:8px; margin-bottom:15px; box-sizing:border-box;">Gün içinde aktif olarak devriye faaliyeti sürdürülmüş, şehir içinde rutin GBT işlemleri yapılıp akabinde çevirmeler ve şüpheli şahıslara yönelik üst arama kontrolleri gerçekleştirilmiştir. Emniyetin motorize takviyesi tarafımızca sağlanmıştır. Harici olarak, yeni Yunus adayları ileri sürüş sertifika sınavına tabi tutulmuş ve şehrimizin güvenliği tesis edilmiştir.</textarea>
+            
+            <div style="display:flex; gap:15px; margin-bottom:15px;">
+                <div style="flex:1">
+                    <label style="font-size:12px; color:var(--info); font-weight:700;">GBT YAPILAN ŞAHIS</label>
+                    <input type="number" id="gs-gbt" value="0" min="0" oninput="saveState()" style="width:100%; margin-top:8px; background:var(--input-bg); color:white; border:1px solid var(--border); padding:14px; border-radius:12px;">
+                </div>
+                <div style="flex:1">
+                    <label style="font-size:12px; color:var(--danger); font-weight:700;">İŞLEM YAPILAN ŞAHIS</label>
+                    <input type="number" id="gs-islem" value="0" min="0" oninput="saveState()" style="width:100%; margin-top:8px; background:var(--input-bg); color:white; border:1px solid var(--border); padding:14px; border-radius:12px;">
+                </div>
+            </div>
+
+            <label style="font-size:12px; color:var(--warning); font-weight:700;">ELE GEÇİRİLEN MATERYALLER (Örn: 5 Tabanca, 300 Meth)</label>
+            <input type="text" id="gs-ele" oninput="saveState()" placeholder="Yoksa boş bırakın veya 'Rastlanmamıştır.' yazın..." style="width:100%; margin-top:8px; margin-bottom:20px; background:var(--input-bg); color:white; border:1px solid var(--border); padding:14px; border-radius:12px; box-sizing:border-box;">
+
+            <button class="btn" style="background:var(--success);" onclick="generateGunSonu()">RAPORU EKRANDA GÖSTER</button>
         </div>
-        <div id="res-ceza"></div>
-        <div id="banner-ceza" style="display:none; background:var(--success); color:white; padding:20px; border-radius:16px; text-align:center; font-weight:800; margin-top:20px;"></div>
     </div>
+
+    <!-- GÜN SONU MODAL -->
+    <div id="gs-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+        <div style="background:var(--card); width:100%; max-width:800px; border-radius:24px; padding:40px; border:1px solid var(--border); box-shadow:0 20px 50px rgba(0,0,0,0.8); position:relative;">
+            <button onclick="document.getElementById('gs-modal').style.display='none'" style="position:absolute; top:20px; right:25px; background:none; border:none; color:#8e8e93; font-size:28px; cursor:pointer; font-weight:bold; transition:0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#8e8e93'">&times;</button>
+            <h2 style="margin-top:0; color:var(--primary); text-align:center; font-size:24px;">GÜN SONU RAPORU</h2>
+            <div id="modal-content" style="font-family:'Inter', sans-serif; font-size:18px; line-height:1.6; color:#fff; white-space:pre-wrap; margin-top:30px; text-align:center;"></div>
+        </div>
+    </div>
+
 
     <div id="guide" class="tab-content">
         <div class="guide-container">
             <div class="guide-card">
                 <h3>1. Veri Nasıl Çekilir?</h3>
-                <p>Discord kanalındayken CTRL + SHIFT + I tuşuna basın, "Console" sekmesine gelin ve aşağıdaki kodu yapıştırın. <b>ROL_ID_YAZIN</b> yerine birimin rol ID'sini girin.</p>
-                <div class="code-block" id="vCode">
-(async () => { 
-    const rId = "ROL_ID_YAZIN"; 
-    const { GuildMemberStore, UserStore } = Vencord.Webpack.Common; 
-    const gId = window.location.pathname.split('/')[2]; 
-    const raw = GuildMemberStore.getMembers(gId); 
-    const m = Object.values(raw).filter(x => x.roles.includes(rId)).map(x => ({ 
-        id: x.userId, name: x.nick || UserStore.getUser(x.userId).username 
-    })); 
-    console.log(JSON.stringify(m)); 
-    alert(m.length + " kişi hazır."); 
-})();
-                </div>
+                <p>Hangi birimin yoklamasını alacağınızı seçin, ardından aşağıdaki kodu kopyalayıp Discord'da CTRL + SHIFT + I yaparak "Console" sekmesine yapıştırın.</p>
+                <select id="guide-role-select" onchange="updateGuideCode()" style="width:100%; background:var(--input-bg); color:white; border:1px solid var(--border); padding:14px; border-radius:12px; margin-bottom:15px; font-family:'Inter', sans-serif;">
+                    <option value="1434270893395152986">Yunus (1434270893395152986)</option>
+                    <option value="1434270893407994038">Trafik (1434270893407994038)</option>
+                    <option value="1434270893407994039">Asayiş (1434270893407994039)</option>
+                    <option value="282801453301628928">Sivil Asayiş (282801453301628928)</option>
+                    <option value="1434270893395152981">Sivil Trafik (1434270893395152981)</option>
+                </select>
+                <div class="code-block" id="vCode"></div>
                 <button class="btn" style="background:var(--info); width:auto; padding:10px 20px;" onclick="copyGuideCode()">Kodu Kopyala</button>
             </div>
 
@@ -77,14 +97,12 @@
                 <p>Konsoldan kopyaladığınız veriyi Yoklama sekmesindeki kutuya yapıştırın. "Listeyi Yükle" butonuna basın. Personellerin durumunu işaretledikten sonra "Raporu Hazırla" butonuna basın. Rapor otomatik kopyalanacaktır.</p>
             </div>
 
-            <div class="guide-card">
-                <h3>3. Ceza Analizi Nasıl Yapılır?</h3>
-                <p>Discord ceza-log kanalındaki mesajları kopyalayın, Ceza Analizi sekmesine yapıştırın ve "Logları Analiz Et" butonuna basın. Hatalı cezaları X butonu ile silebilirsiniz.</p>
-            </div>
+
         </div>
     </div>
 </div>
 
+<div id="toast-container" class="toast-container"></div>
 <script src="script.js"></script>
 </body>
 </html>
