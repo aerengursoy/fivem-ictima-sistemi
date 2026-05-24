@@ -118,13 +118,21 @@
                 <p>Discord'da el koyma raporlarının atıldığı odadayken aşağıdaki kodu konsola yapıştırırsanız, <b>BUGÜN</b> atılan tüm mesajlar kopyalanır. Ardından "Kanıt Analizi" sekmesine yapıştırabilirsiniz.</p>
                 <div class="code-block" id="vCode2">
 (async () => {
-    const { MessageStore, SelectedChannelStore } = Vencord.Webpack.Common;
+    const { MessageStore, SelectedChannelStore, GuildStore, GuildMemberStore, UserStore } = Vencord.Webpack.Common;
     const cId = SelectedChannelStore.getChannelId();
+    const gId = GuildStore.getGuildId();
     const msgObj = MessageStore.getMessages(cId);
     let msgs = msgObj.toArray ? msgObj.toArray() : (msgObj._array || Object.values(msgObj));
     const today = new Date(); today.setHours(0,0,0,0);
     const todayMsgs = msgs.filter(m => m && m.timestamp && new Date(m.timestamp) >= today && m.content);
-    const result = todayMsgs.map(m => m.content).join('\n\n');
+    const result = todayMsgs.map(m => {
+        return m.content.replace(/<@!?(\d+)>/g, (match, id) => {
+            let member = GuildMemberStore.getMember(gId, id);
+            let user = UserStore.getUser(id);
+            let name = member && member.nick ? member.nick : (user ? user.globalName || user.username : id);
+            return "@" + name;
+        });
+    }).join('\n\n');
     if(result.length > 0) {
         copy(result);
         alert(todayMsgs.length + " mesaj kopyalandı! Şimdi Kanıt Analizi sekmesine yapıştırabilirsiniz.");
