@@ -299,7 +299,7 @@ function analyzeKanit() {
     const prefix = document.getElementById('k-prefix').value.trim();
     if(!raw || !prefix) return showToast("Lütfen metin ve birim kodu girin.", "error");
 
-    let blocks = raw.split("El koyan memur:");
+    let blocks = raw.split(/El koyan memur:/i);
     let items = [];
 
     for (let i = 1; i < blocks.length; i++) {
@@ -307,7 +307,7 @@ function analyzeKanit() {
         let lines = block.split('\n').map(l => l.trim()).filter(l => l !== "");
         
         if(lines.length > 0 && lines[0].includes(prefix)) {
-            let esyaLine = lines.find(l => l.startsWith("El koyulan eşya:") || l.startsWith("El koylan eşya:"));
+            let esyaLine = lines.find(l => l.toLowerCase().startsWith("el koyulan eşya:") || l.toLowerCase().startsWith("el koylan eşya:"));
             if(esyaLine) {
                 let esya = esyaLine.substring(esyaLine.indexOf(':') + 1).trim();
                 if(esya.toLowerCase() !== "ekte") {
