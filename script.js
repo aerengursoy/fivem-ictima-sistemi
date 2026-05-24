@@ -293,6 +293,23 @@ function loadState() {
 
 document.addEventListener('DOMContentLoaded', loadState);
 
+// Eşya isimlerini standartlaştıran sözlük fonksiyonu
+function normalizeItemName(name) {
+    let lower = name.toLowerCase().trim();
+    if(lower.includes("combat")) return "Combat Pistol";
+    if(lower.includes("sns")) return "SNS Pistol";
+    if(lower.includes("ağır zırh") || lower.includes("hafif zırh") || lower === "zırh") return "Zırh";
+    if(lower.includes("paketlenmiş kenevir")) return "Paketlenmiş Kenevir";
+    if(lower.includes("kenevir") || lower.includes("ot")) return "Kenevir";
+    if(lower.includes("paketlenmiş meth")) return "Paketlenmiş Meth";
+    if(lower.includes("meth")) return "Meth";
+    if(lower.includes("muşta")) return "Muşta";
+    if(lower.includes("anonim")) return "Anonim";
+    
+    // Bilinmeyen eşyalar için ilk harfleri büyüt
+    return lower.replace(/\b\w/g, char => char.toUpperCase());
+}
+
 // --- KANIT ANALİZİ ---
 function analyzeKanit() {
     const raw = document.getElementById('k-input').value;
@@ -300,7 +317,8 @@ function analyzeKanit() {
     if(!raw || !prefix) return showToast("Lütfen metin ve birim kodu girin.", "error");
 
     let blocks = raw.split(/El koyan memur:/i);
-    let items = [];
+    let itemMap = {};
+    let reportCount = 0;
 
     for (let i = 1; i < blocks.length; i++) {
         let block = blocks[i];
@@ -309,18 +327,47 @@ function analyzeKanit() {
         if(lines.length > 0 && lines[0].includes(prefix)) {
             let esyaLine = lines.find(l => l.toLowerCase().startsWith("el koyulan eşya:") || l.toLowerCase().startsWith("el koylan eşya:"));
             if(esyaLine) {
-                let esya = esyaLine.substring(esyaLine.indexOf(':') + 1).trim();
-                if(esya.toLowerCase() !== "ekte") {
-                    items.push(esya);
+                let esyaRaw = esyaLine.substring(esyaLine.indexOf(':') + 1).trim();
+                if(esyaRaw.toLowerCase() !== "ekte") {
+                    reportCount++;
+                    // Eşyaları artı veya virgül ile ayır
+                    let parts = esyaRaw.split(/[\+,]/);
+                    parts.forEach(p => {
+                        p = p.trim();
+                        if(p === "") return;
+                        
+                        let qty = 1;
+                        let itemName = p;
+                        
+                        // "5x Combat" veya "5 combat" formatını yakala
+                        let match = p.match(/^(\d+)x?\s*(.+)$/i);
+                        if(match) {
+                            qty = parseInt(match[1]);
+                            itemName = match[2];
+                        }
+                        
+                        let normName = normalizeItemName(itemName);
+                        
+                        if(itemMap[normName]) {
+                            itemMap[normName] += qty;
+                        } else {
+                            itemMap[normName] = qty;
+                        }
+                    });
                 }
             }
         }
     }
 
-    if(items.length > 0) {
-        document.getElementById('k-result').innerText = items.join(" + ");
+    let finalStrings = [];
+    for(let key in itemMap) {
+        finalStrings.push(`${itemMap[key]}x ${key}`);
+    }
+
+    if(finalStrings.length > 0) {
+        document.getElementById('k-result').innerText = finalStrings.join(" + ");
         document.getElementById('k-result-box').style.display = "block";
-        showToast(items.length + " rapor ayıklandı!", "success");
+        showToast(reportCount + " rapor analiz edildi!", "success");
     } else {
         document.getElementById('k-result-box').style.display = "none";
         showToast("Kritere uygun eşya bulunamadı.", "error");
