@@ -118,16 +118,17 @@
                 <p>Discord'da el koyma raporlarının atıldığı odadayken aşağıdaki kodu konsola yapıştırırsanız, <b>BUGÜN</b> atılan tüm mesajlar kopyalanır. Ardından "Kanıt Analizi" sekmesine yapıştırabilirsiniz.</p>
                 <div class="code-block" id="vCode2">
 (async () => {
-    const { MessageStore } = Vencord.Webpack.Common;
-    const cId = window.location.pathname.split('/').pop();
-    const msgs = Object.values(MessageStore.getMessages(cId)._array || []);
+    const { MessageStore, SelectedChannelStore } = Vencord.Webpack.Common;
+    const cId = SelectedChannelStore.getChannelId();
+    const msgObj = MessageStore.getMessages(cId);
+    let msgs = msgObj.toArray ? msgObj.toArray() : (msgObj._array || Object.values(msgObj));
     const today = new Date(); today.setHours(0,0,0,0);
-    const todayMsgs = msgs.filter(m => new Date(m.timestamp) >= today && m.content);
+    const todayMsgs = msgs.filter(m => m && m.timestamp && new Date(m.timestamp) >= today && m.content);
     const result = todayMsgs.map(m => m.content).join('\n\n');
     if(result.length > 0) {
         copy(result);
         alert(todayMsgs.length + " mesaj kopyalandı! Şimdi Kanıt Analizi sekmesine yapıştırabilirsiniz.");
-    } else alert("Bugün hiç mesaj bulunamadı veya yüklenmedi (biraz yukarı kaydırın).");
+    } else alert("Bugün hiç mesaj bulunamadı veya yüklenmedi (Lütfen Discord'da biraz yukarı kaydırıp mesajları yükleyin ve kodu tekrar çalıştırın).");
 })();</div>
                 <button class="btn" style="background:var(--info); width:auto; padding:10px 20px;" onclick="copyGuideCode2()">Kodu Kopyala</button>
             </div>
