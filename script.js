@@ -292,3 +292,51 @@ function loadState() {
 }
 
 document.addEventListener('DOMContentLoaded', loadState);
+
+// --- KANIT ANALİZİ ---
+function analyzeKanit() {
+    const raw = document.getElementById('k-input').value;
+    const prefix = document.getElementById('k-prefix').value.trim();
+    if(!raw || !prefix) return showToast("Lütfen metin ve birim kodu girin.", "error");
+
+    let blocks = raw.split("El koyan memur:");
+    let items = [];
+
+    for (let i = 1; i < blocks.length; i++) {
+        let block = blocks[i];
+        let lines = block.split('\n').map(l => l.trim()).filter(l => l !== "");
+        
+        if(lines.length > 0 && lines[0].includes(prefix)) {
+            let esyaLine = lines.find(l => l.startsWith("El koyulan eşya:") || l.startsWith("El koylan eşya:"));
+            if(esyaLine) {
+                let esya = esyaLine.substring(esyaLine.indexOf(':') + 1).trim();
+                if(esya.toLowerCase() !== "ekte") {
+                    items.push(esya);
+                }
+            }
+        }
+    }
+
+    if(items.length > 0) {
+        document.getElementById('k-result').innerText = items.join(" + ");
+        document.getElementById('k-result-box').style.display = "block";
+        showToast(items.length + " rapor ayıklandı!", "success");
+    } else {
+        document.getElementById('k-result-box').style.display = "none";
+        showToast("Kritere uygun eşya bulunamadı.", "error");
+    }
+}
+
+function transferToGunSonu() {
+    const result = document.getElementById('k-result').innerText;
+    document.getElementById('gs-ele').value = result;
+    saveState();
+    showTab('gunsonu');
+    showToast("Eşyalar Gün Sonu Raporuna aktarıldı!", "success");
+}
+
+function copyGuideCode2() {
+    const code = document.getElementById('vCode2').innerText;
+    navigator.clipboard.writeText(code);
+    showToast("Mesaj Vencord kodu kopyalandı!", "success");
+}

@@ -13,9 +13,10 @@
     <h1>YER6 RAPOR SİSTEMİ - YAVUZ ŞAHİN</h1>
     
     <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('ictima')">📍 YOKLAMA</button>
-        <button class="tab-btn" onclick="showTab('gunsonu')">📝 GÜN SONU</button>
-        <button class="tab-btn" onclick="showTab('guide')">📖 REHBER</button>
+        <button class="tab-btn active" onclick="showTab('ictima')">YOKLAMA</button>
+        <button class="tab-btn" onclick="showTab('gunsonu')">RAPOR</button>
+        <button class="tab-btn" onclick="showTab('kanit')">KANIT ANALİZİ</button>
+        <button class="tab-btn" onclick="showTab('guide')">REHBER</button>
     </div>
 
     <div id="ictima" class="tab-content active">
@@ -76,10 +77,30 @@
     </div>
 
 
+    <div id="kanit" class="tab-content">
+        <div class="section-box">
+            <h3 style="margin-top:0; color:var(--primary); font-size:16px;">KANIT RAPORU ANALİZİ</h3>
+            <p style="font-size:13px; color:#8e8e93; margin-bottom:15px; line-height:1.5;">Discord'daki el koyma raporlarını buraya yapıştırın. Sistem sadece belirttiğiniz birime ait (Örn: 72-) raporları ayıklar ve ele geçirilen eşyaları listeler.</p>
+            
+            <label style="font-size:12px; color:var(--primary); font-weight:700;">HEDEF BİRİM KODU (Örn: 72-)</label>
+            <input type="text" id="k-prefix" value="72-" style="width:100%; margin-top:8px; margin-bottom:15px; background:var(--input-bg); color:white; border:1px solid var(--border); padding:14px; border-radius:12px; box-sizing:border-box;">
+            
+            <textarea id="k-input" placeholder="Discord mesajlarını buraya yapıştırın..." style="height:150px;"></textarea>
+            
+            <button class="btn" onclick="analyzeKanit()">EŞYALARI ANALİZ ET</button>
+            
+            <div id="k-result-box" style="display:none; margin-top:20px;">
+                <h4 style="margin:0 0 10px 0; color:var(--success);">Bulunan Eşyalar:</h4>
+                <div id="k-result" class="code-block" style="font-size:14px; color:#fff; background:rgba(0,0,0,0.4); border-left:4px solid var(--success); padding:15px; white-space:pre-wrap; margin-bottom:15px;"></div>
+                <button class="btn" style="background:var(--info);" onclick="transferToGunSonu()">GÜN SONU RAPORUNA AKTAR</button>
+            </div>
+        </div>
+    </div>
+
     <div id="guide" class="tab-content">
         <div class="guide-container">
             <div class="guide-card">
-                <h3>1. Veri Nasıl Çekilir?</h3>
+                <h3>1. Yoklama Verisi Nasıl Çekilir?</h3>
                 <p>Hangi birimin yoklamasını alacağınızı seçin, ardından aşağıdaki kodu kopyalayıp Discord'da CTRL + SHIFT + I yaparak "Console" sekmesine yapıştırın.</p>
                 <select id="guide-role-select" onchange="updateGuideCode()" style="width:100%; background:var(--input-bg); color:white; border:1px solid var(--border); padding:14px; border-radius:12px; margin-bottom:15px; font-family:'Inter', sans-serif;">
                     <option value="1434270893395152986">Yunus (1434270893395152986)</option>
@@ -93,7 +114,27 @@
             </div>
 
             <div class="guide-card">
-                <h3>2. Yoklama Nasıl Alınır?</h3>
+                <h3>2. Kanıt (Mesaj) Verisi Nasıl Çekilir?</h3>
+                <p>Discord'da el koyma raporlarının atıldığı odadayken aşağıdaki kodu konsola yapıştırırsanız, <b>BUGÜN</b> atılan tüm mesajlar kopyalanır. Ardından "Kanıt Analizi" sekmesine yapıştırabilirsiniz.</p>
+                <div class="code-block" id="vCode2">
+(async () => {
+    const { MessageStore } = Vencord.Webpack.Common;
+    const cId = window.location.pathname.split('/').pop();
+    const msgs = Object.values(MessageStore.getMessages(cId)._array || []);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayMsgs = msgs.filter(m => new Date(m.timestamp) >= today && m.content);
+    const result = todayMsgs.map(m => m.content).join('\n\n');
+    if(result.length > 0) {
+        copy(result);
+        alert(todayMsgs.length + " mesaj kopyalandı! Şimdi Kanıt Analizi sekmesine yapıştırabilirsiniz.");
+    } else alert("Bugün hiç mesaj bulunamadı veya yüklenmedi (biraz yukarı kaydırın).");
+})();</div>
+                <button class="btn" style="background:var(--info); width:auto; padding:10px 20px;" onclick="copyGuideCode2()">Kodu Kopyala</button>
+            </div>
+
+
+            <div class="guide-card">
+                <h3>3. Yoklama Nasıl Alınır?</h3>
                 <p>Konsoldan kopyaladığınız veriyi Yoklama sekmesindeki kutuya yapıştırın. "Listeyi Yükle" butonuna basın. Personellerin durumunu işaretledikten sonra "Raporu Hazırla" butonuna basın. Rapor otomatik kopyalanacaktır.</p>
             </div>
 
