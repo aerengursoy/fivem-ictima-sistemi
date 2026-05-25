@@ -325,7 +325,7 @@ function analyzeKanit() {
         let lines = block.split('\n').map(l => l.trim()).filter(l => l !== "");
         
         if(lines.length > 0 && lines[0].includes(prefix)) {
-            let esyaLine = lines.find(l => l.toLowerCase().startsWith("el koyulan eşya:") || l.toLowerCase().startsWith("el koylan eşya:"));
+            let esyaLine = lines.find(l => l.toLowerCase().startsWith("el koyulan eşya:") || l.toLowerCase().startsWith("el koylan eşya:") || l.toLowerCase().startsWith("el konulan eşya:"));
             if(esyaLine) {
                 let esyaRaw = esyaLine.substring(esyaLine.indexOf(':') + 1).trim();
                 if(esyaRaw.toLowerCase() !== "ekte") {
